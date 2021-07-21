@@ -1,9 +1,11 @@
 import zipfile, requests, os, shutil, subprocess
 
+
 ####################################################################################################
 def create_or_replace_txt_file(path: str, contents: str):
     with open(path, "wt") as f:
         f.write(contents)
+
 
 ####################################################################################################
 def download_url(url: str, path: str):
@@ -11,10 +13,12 @@ def download_url(url: str, path: str):
     with open(path, 'wb') as f:
         f.write(the_file.content)
 
+
 ####################################################################################################
 def unzip_file(zip_path: str, dest_path: str):
     with zipfile.ZipFile(zip_path) as z:
         z.extractall(dest_path)
+
 
 ####################################################################################################
 def run_process(working_dir: str, args: list):
@@ -22,6 +26,7 @@ def run_process(working_dir: str, args: list):
     os.chdir(working_dir)
     subprocess.call(args)
     os.chdir(original_cwd)
+
 
 ####################################################################################################
 PYTHON_PTH_CONTENTS = '''..
@@ -159,47 +164,66 @@ void main() {
 ####################################################################################################
 if __name__ == "__main__":
 
-    # Get Python
+    # parameters
+    python_download_url = "https://www.python.org/ftp/python/3.9.6/python-3.9.6-embed-amd64.zip"
     python_download_path = "./python.zip"
-    download_url("https://www.python.org/ftp/python/3.9.6/python-3.9.6-embed-amd64.zip",
-                 python_download_path)
-    unzip_file(python_download_path, "./python39x64")
+    python_path = "./python39x64"
+    python_pth_file = python_path + "/python39._pth"
+
+    get_pip_url = "https://bootstrap.pypa.io/get-pip.py"
+    get_pip_path = python_path + "/get-pip.py"
+
+    python_scripts_path = "./python"
+    python_app_path = python_scripts_path + "/app.py"
+
+    python_dart_path = "./lib/python.dart"
+    python_test_dart_path = "./test/python_test.dart"
+
+    # Run some checks first
+    if os.path.isdir(python_path):
+        print(python_path + " already exists. You've ran this script before.")
+        exit(-1)
+
+    # Get Python
+    download_url(python_download_url, python_download_path)
+    unzip_file(python_download_path, python_path)
+    os.remove(python_download_path)
 
     # Setup ._pth file
-    create_or_replace_txt_file("./python39x64/python39._pth", PYTHON_PTH_CONTENTS)
+    create_or_replace_txt_file(python_pth_file, PYTHON_PTH_CONTENTS)
 
     # Download and run get-pip.py
-    download_url("https://bootstrap.pypa.io/get-pip.py", "./python39x64/get-pip.py")
-    run_process("./python39x64", ["./python.exe", "./get-pip.py"])
+    download_url(get_pip_url, get_pip_path)
+    run_process(python_path, ["./python.exe", "./get-pip.py"])
 
     # Create Python code template
-    os.mkdir("./python")
-    create_or_replace_txt_file("./python/app.py", PYTHON_APP_CONTENTS)
+    os.mkdir(python_scripts_path)
+    create_or_replace_txt_file(python_app_path, PYTHON_APP_CONTENTS)
 
     # Create Python class for Dart
-    create_or_replace_txt_file("./lib/python.dart", PYTHON_DART_CONTENTS)
+    create_or_replace_txt_file(python_dart_path, PYTHON_DART_CONTENTS)
 
     # Create Python class tests
-    create_or_replace_txt_file("./test/python_test.dart", PYTHON_TEST_CONTENTS)
+    create_or_replace_txt_file(python_test_dart_path, PYTHON_TEST_CONTENTS)
 
     print(
-'''
-
-Add the following dependencies to pubspec.yaml:
-mutex: ^3.0.0
-
-Add the following to main.cpp in windows folder:
-// https://stackoverflow.com/questions/67082272/dart-how-to-hide-cmd-when-using-process-run
-else {
-    AllocConsole();
-    ShowWindow(GetConsoleWindow(), SW_HIDE);
-}
-
-Add the following to .gitignore:
-./python.zip
-./python39x64
-
-Check out tests to see how things work:
-Replace your project name for the import line in tests.
-
-''')
+        '''
+        
+        Add the following dependencies to pubspec.yaml:
+        mutex: ^3.0.0
+        
+        Add the following to main.cpp in windows folder:
+        // https://stackoverflow.com/questions/67082272/dart-how-to-hide-cmd-when-using-process-run
+        else {
+            AllocConsole();
+            ShowWindow(GetConsoleWindow(), SW_HIDE);
+        }
+        
+        Add the following to .gitignore:
+        ./python.zip
+        ./python39x64
+        
+        Check out tests to see how things work:
+        Replace your project name for the import line in tests.
+        
+        ''')
