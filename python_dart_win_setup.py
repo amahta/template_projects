@@ -1,4 +1,4 @@
-import zipfile, requests, os, shutil, subprocess
+import zipfile, requests, os, subprocess
 
 
 ####################################################################################################
