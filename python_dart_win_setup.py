@@ -46,6 +46,9 @@ CMD_EXIT = 0
 CMD_ADD = 1
 CMD_MUL = 2
 
+STREAM_START = "`S`T`R`E`A`M` `S`T`A`R`T`"
+STREAM_END   = "`S`T`R`E`A`M` `E`N`D`"
+
 def add(a, b):
     return {"result": a + b}
 
@@ -74,7 +77,7 @@ if __name__ == "__main__":
         except Exception as e:
             result = {"exception": e.__str__()}
         result = json.dumps(result)
-        print(result + "`S`T`R`E`A`M` `E`N`D`")
+        print(STREAM_START + result + STREAM_END)
 
 '''
 
@@ -83,9 +86,11 @@ PYTHON_DART_CONTENTS = '''
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
+
 import 'package:mutex/mutex.dart';
 
 class Python {
+  static const _STDOUT_STREAM_START = "`S`T`R`E`A`M` `S`T`A`R`T`";
   static const _STDOUT_STREAM_END = "`S`T`R`E`A`M` `E`N`D`";
 
   static const _CMD_EXIT = 0;
@@ -98,27 +103,45 @@ class Python {
   final _runCmdMutex = Mutex();
 
   Future<bool> initialize() async {
-    _process = await Process.start("./python39x64/python.exe", ["./python/app.py"]);
+    return await _runCmdMutex.protect<bool>(() async {
+      return await _initializeUnprotected();
+    });
+  }
+
+  Future<bool> _initializeUnprotected() async {
+    _process =
+        await Process.start("./python39x64/python.exe", ["./python/app.py"]);
     _process.stdout.transform(utf8.decoder).forEach((element) {
+      //print(element);
       _result += element;
       if (_result.contains(_STDOUT_STREAM_END) &&
           !_resultCompleter.isCompleted) {
-        _resultCompleter
-            .complete(_result.replaceAll(_STDOUT_STREAM_END, "").trim());
+        _resultCompleter.complete(_result
+            .split(_STDOUT_STREAM_START)[1]
+            .replaceAll(_STDOUT_STREAM_END, "")
+            .trim());
       }
+    });
+
+    _process.stderr.transform(utf8.decoder).forEach((element) {
+      //print(element);
     });
     return true;
   }
 
   Future<dynamic> _runCommand(dynamic command) async {
     return await _runCmdMutex.protect<dynamic>(() async {
-      final jsCommand = jsonEncode(command);
-      _resultCompleter = Completer();
-      _result = "";
-      _process.stdin.writeln(jsCommand);
-      final jsResult = await _resultCompleter.future;
-      return jsonDecode(jsResult);
+      return await _runCommandUnprotected(command);
     });
+  }
+
+  Future<dynamic> _runCommandUnprotected(dynamic command) async {
+    final jsCommand = jsonEncode(command);
+    _resultCompleter = Completer();
+    _result = "";
+    _process.stdin.writeln(jsCommand);
+    final jsResult = await _resultCompleter.future;
+    return jsonDecode(jsResult);
   }
 
   Future<int> add(int a, int b) async {
