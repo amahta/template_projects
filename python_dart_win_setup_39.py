@@ -1,4 +1,7 @@
-import zipfile, requests, os, subprocess
+import os
+import subprocess
+import zipfile
+import requests
 
 
 ####################################################################################################
@@ -46,14 +49,17 @@ CMD_EXIT = 0
 CMD_ADD = 1
 CMD_MUL = 2
 
-STREAM_START = "`S`T`R`E`A`M` `S`T`A`R`T`"
-STREAM_END   = "`S`T`R`E`A`M` `E`N`D`"
+STREAM_START = "`S`T`R`E`A`M`43fd93e2-0932-4fe6-a0b6-a4320aca6aa0`S`T`A`R`T`"
+STREAM_END = "`S`T`R`E`A`M`43fd93e2-0932-4fe6-a0b6-a4320aca6aa0`E`N`D`"
+
 
 def add(a, b):
     return {"result": a + b}
 
+
 def mul(a, b):
     return {"result": a * b}
+
 
 def run(command):
     if command["cmd"] == CMD_EXIT:
@@ -67,6 +73,7 @@ def run(command):
 
     else:
         return {"error": "Unknown command."}
+
 
 if __name__ == "__main__":
     while True:
@@ -90,8 +97,8 @@ import 'dart:io';
 import 'package:mutex/mutex.dart';
 
 class Python {
-  static const _STDOUT_STREAM_START = "`S`T`R`E`A`M` `S`T`A`R`T`";
-  static const _STDOUT_STREAM_END = "`S`T`R`E`A`M` `E`N`D`";
+  static const _STDOUT_STREAM_START = "`S`T`R`E`A`M`43fd93e2-0932-4fe6-a0b6-a4320aca6aa0`S`T`A`R`T`";
+  static const _STDOUT_STREAM_END = "`S`T`R`E`A`M`43fd93e2-0932-4fe6-a0b6-a4320aca6aa0`E`N`D`";
 
   static const _CMD_EXIT = 0;
   static const _CMD_ADD = 1;
@@ -188,7 +195,7 @@ void main() {
 if __name__ == "__main__":
 
     # parameters
-    python_download_url = "https://www.python.org/ftp/python/3.9.6/python-3.9.6-embed-amd64.zip"
+    python_download_url = "https://www.python.org/ftp/python/3.9.7/python-3.9.7-embed-amd64.zip"
     python_download_path = "./python.zip"
     python_path = "./python39x64"
     python_pth_file = python_path + "/python39._pth"
@@ -243,8 +250,7 @@ if __name__ == "__main__":
         }
         
         Add the following to .gitignore:
-        ./python.zip
-        ./python39x64
+        /python39x64/
         
         Check out tests to see how things work:
         Replace your project name for the import line in tests.
