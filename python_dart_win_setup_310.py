@@ -33,9 +33,11 @@ def run_process(working_dir: str, args: list):
 
 ####################################################################################################
 PYTHON_PTH_CONTENTS = '''..
+../python
 ./Lib/site-packages
-python39.zip
+python310.zip
 .
+
 import site
 '''
 
@@ -219,7 +221,7 @@ if __name__ == "__main__":
         }
         
         Add the following to .gitignore:
-        /python39x64/
+        /python310x64/
         
         Check out tests to see how things work:
         Replace your project name for the import line in tests.
